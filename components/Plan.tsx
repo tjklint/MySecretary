@@ -1,28 +1,71 @@
-import React from "react";
-import { View, Text, Image, ScrollView, StyleSheet, Dimensions, Platform } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, ScrollView, Pressable, StyleSheet, Platform } from "react-native";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "./Secretary";
+import { getWeather } from "../backend/services/weatherService";
 
-const { width } = Dimensions.get("window");
-
-const GOOGLE_MAPS_API_KEY = "AIzaSyDXlf0tCD7YL2sIRX0MlPLcvp9r4fu_peE"; // Replace with yours!
+const GOOGLE_MAPS_API_KEY = "AIzaSyDXlf0tCD7YL2sIRX0MlPLcvp9r4fu_peE"; // Replace yours
 
 const Plan: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, "Plan">>();
   const { backendPlan, tot } = route.params;
   const { destination, travelInfo, plan } = backendPlan;
+  const [checkedItems, setCheckedItems] = useState<number[]>([]);
+  const [weatherInfo, setWeatherInfo] = useState<any>(null);
+  const [updatedPackingList, setUpdatedPackingList] = useState<string[]>(plan.packingList);
 
   const mode = tot === "Driving" ? "driving" : "transit";
 
   const mapUrl = `https://www.google.com/maps/embed/v1/directions?key=${GOOGLE_MAPS_API_KEY}&origin=current+location&destination=${encodeURIComponent(destination)}&mode=${mode}`;
 
+  useEffect(() => {
+    async function fetchWeather() {
+      try {
+        const weather = await getWeather(destination);
+        setWeatherInfo(weather);
+
+        let extraItems: string[] = [];
+        if (weather.isRaining) extraItems.push("Umbrella");
+        if (weather.isSnowing) extraItems.push("Winter Jacket");
+        if (weather.isSunny) extraItems.push("Sunscreen");
+
+        setUpdatedPackingList([...plan.packingList, ...extraItems]);
+      } catch (error) {
+        console.error("Failed to fetch weather:", error);
+      }
+    }
+    fetchWeather();
+  }, [destination]);
+
+  const toggleItem = (index: number) => {
+    if (checkedItems.includes(index)) {
+      setCheckedItems(checkedItems.filter(i => i !== index));
+    } else {
+      setCheckedItems([...checkedItems, index]);
+    }
+  };
+
+  const getWeatherEmoji = (condition: string) => {
+    if (condition.toLowerCase().includes("rain")) return "🌧️";
+    if (condition.toLowerCase().includes("snow")) return "❄️";
+    if (condition.toLowerCase().includes("sun")) return "🌞";
+    if (condition.toLowerCase().includes("cloud")) return "☁️";
+    return "🌈";
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image
-        source={require("../assets/pompompurin.png")}
-        style={styles.image}
-      />
+      <Image source={require("../assets/pompompurin.png")} style={styles.image} />
       <Text style={styles.header}>Here's what I got for you!</Text>
+
+      {weatherInfo && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Weather Forecast</Text>
+          <Text style={styles.text}>
+            {getWeatherEmoji(weatherInfo.condition)} {weatherInfo.tempC}°C, {weatherInfo.condition}
+          </Text>
+        </View>
+      )}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Destination</Text>
@@ -58,19 +101,39 @@ const Plan: React.FC = () => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Packing List</Text>
-        {plan.packingList.map((item: string, index: number) => (
-          <Text key={index} style={styles.bulletText}>• {item}</Text>
+        {updatedPackingList.map((item, index) => (
+          <Pressable key={index} onPress={() => toggleItem(index)}>
+            <Text
+              style={[
+                styles.bulletText,
+                checkedItems.includes(index) && { textDecorationLine: "line-through", color: "#888" },
+              ]}
+            >
+              • {item}
+            </Text>
+          </Pressable>
         ))}
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Schedule</Text>
         {plan.schedule.map((sched: any, index: number) => (
-          <Text key={index} style={styles.bulletText}>
-            • {sched.time}: {sched.task}
-          </Text>
+            <Pressable
+            key={index}
+            onPress={() => {
+                const calendarUrl = `https://calendar.google.com/calendar/u/0/r/eventedit?text=${encodeURIComponent(
+                sched.task
+                )}&dates=&details=Planned+via+MiniDawsHacks`;
+                window.open(calendarUrl, "_blank");
+            }}
+            >
+            <Text style={styles.bulletText}>
+                ➕ {sched.time}: {sched.task}
+            </Text>
+            </Pressable>
         ))}
-      </View>
+        </View>
+
     </ScrollView>
   );
 };
