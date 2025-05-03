@@ -1,26 +1,39 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { View, Text, StyleSheet } from 'react-native';
 
 const Secretary: React.FC = () => {
     return (
-        <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
-            <Typography variant="h6" gutterBottom>
+        <View style={styles.container}>
+            <Text style={styles.title}>
                 How can I help you today?
-            </Typography>
-            <Box 
-                width="100%" 
-                height="200px" 
-                border="1px solid #ccc" 
-                borderRadius="8px" 
-                mt={1} 
-                display="flex" 
-                justifyContent="center" 
-                alignItems="center"
-            >
+            </Text>
+            <View style={styles.box}>
                 {/* Content for the box goes here */}
-            </Box>
-        </Box>
+            </View>
+        </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        marginTop: 16,
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    box: {
+        width: '100%',
+        height: 200,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        marginTop: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
 
 export default Secretary;
