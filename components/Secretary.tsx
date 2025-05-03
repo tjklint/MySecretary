@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Dimensions,
   Alert,
+  useWindowDimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -32,7 +33,7 @@ const Secretary: React.FC = () => {
   const [budget, setBudget] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const windowWidth = Dimensions.get("window").width;
+  const { width: windowWidth } = useWindowDimensions(); // Dynamically get window width
   const inputWidth = (windowWidth - 2 * 32 - 18) / 2;
 
   const handlePlanTrip = async () => {

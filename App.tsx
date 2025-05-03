@@ -6,7 +6,6 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Secretary from "./components/Secretary";
 import Plan from "./components/Plan";
-import "./app.css";
 
 const Stack = createStackNavigator();
 
