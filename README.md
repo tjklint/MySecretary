@@ -11,7 +11,7 @@
 
 ## ✨ Inspiration
 
-We wanted a **personal trip assistant** — something simple but smart.  
+We wanted a **personal trip assistant**: something simple but smart.  
 Tell it about your plans, and it figures out when you need to leave, how to get there, what to pack, and even the weather. 🌤️
 
 ## 🔥 What it does
