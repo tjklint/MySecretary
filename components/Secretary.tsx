@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { getLocationFromPrompt, getScheduleAndPackingList } from '../backend/services/geminiService';
-import { getTravelInfo } from '../backend/services/mapsService';
+import axios from 'axios';
 import * as Location from 'expo-location';
 
 const Secretary: React.FC = () => {
@@ -24,18 +23,15 @@ const Secretary: React.FC = () => {
                 longitude: gps.coords.longitude,
             };
 
-            // 2. Get destination from Gemini
-            const destination = await getLocationFromPrompt(userInput);
+            // 2. CALL YOUR BACKEND SERVER
+            const response = await axios.post('http://localhost:3001/api/plan', {
+                userInput,
+                origin: originCoords,
+            });
 
-            // 3. Get travel info from Maps
-            const travelInfo = await getTravelInfo(originCoords, destination);
-
-            // 4. Get schedule + packing list from Gemini
-            const plan = await getScheduleAndPackingList(userInput, travelInfo.duration);
-
-            console.log('Destination:', destination);
-            console.log('Travel Info:', travelInfo);
-            console.log('Plan:', plan);
+            console.log('Destination:', response.data.destination);
+            console.log('Travel Info:', response.data.travelInfo);
+            console.log('Plan:', response.data.plan);
 
             Alert.alert('Plan Ready!', 'Check console for full plan.');
 
