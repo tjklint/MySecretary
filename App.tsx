@@ -1,42 +1,40 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Secretary from './components/Secretary';
-import Plan from './components/Plan';
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { View, StyleSheet } from "react-native";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Secretary from "./components/Secretary";
+import Plan from "./components/Plan";
+
+const Stack = createStackNavigator();
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<'Secretary' | 'Plan'>('Secretary');
-
   return (
-    <View style={styles.container}>
-      <Header />
-      <View style={styles.content}>
-        {currentScreen === 'Secretary' ? (
-          <Secretary />
-        ) : (
-          <Plan />
-        )}
-        <Button
-          title={currentScreen === 'Secretary' ? 'Go to Plan' : 'Go to Secretary'}
-          onPress={() =>
-            setCurrentScreen(currentScreen === 'Secretary' ? 'Plan' : 'Secretary')
-          }
-        />
+    <NavigationContainer>
+      <View style={styles.container}>
+        <Header />
+        <View style={styles.content}>
+          <Stack.Navigator
+            initialRouteName="Secretary"
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen name="Secretary" component={Secretary} />
+            <Stack.Screen name="Plan" component={Plan} />
+          </Stack.Navigator>
+        </View>
+        <Footer />
       </View>
-      <Footer />
-    </View>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    flexDirection: "column",
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
