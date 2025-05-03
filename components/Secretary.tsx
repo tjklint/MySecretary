@@ -6,15 +6,18 @@ import {
   Image,
   Pressable,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import axios from "axios";
+import * as Location from "expo-location";
 
 // Define the type for your navigation routes
 export type RootStackParamList = {
   Secretary: undefined;
-  Plan: undefined;
+  Plan: { backendPlan: any; tot: string; budget: string };
 };
 
 const Secretary: React.FC = () => {
@@ -22,6 +25,36 @@ const Secretary: React.FC = () => {
   const [details, setDetails] = useState("");
   const [tot, setTot] = useState("Driving");
   const [budget, setBudget] = useState("");
+
+  const handlePlanTrip = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Location permission is required.');
+        return;
+      }
+      const gps = await Location.getCurrentPositionAsync({});
+      const originCoords = {
+        latitude: gps.coords.latitude,
+        longitude: gps.coords.longitude,
+      };
+
+      const response = await axios.post('http://localhost:3001/api/plan', {
+        userInput: details,
+        origin: originCoords,
+        tot,
+      });
+
+      navigation.navigate("Plan", {
+        backendPlan: response.data,
+        tot,
+        budget,
+      });
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Something went wrong while planning.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -45,11 +78,7 @@ const Secretary: React.FC = () => {
             onValueChange={(itemValue) => setTot(itemValue)}
           >
             <Picker.Item label="Driving" value="Driving" color="#2b5b43" />
-            <Picker.Item
-              label="Public Transport"
-              value="Public"
-              color="#2b5b43"
-            />
+            <Picker.Item label="Public Transport" value="Public" color="#2b5b43" />
           </Picker>
         </View>
         <TextInput
@@ -63,11 +92,7 @@ const Secretary: React.FC = () => {
       </View>
       <Pressable
         style={styles.planButton}
-        onPress={() => navigation.navigate("Plan", {
-          details,
-          tot,
-          budget,
-        })}
+        onPress={handlePlanTrip}
       >
         <Text style={styles.planText}>PLAN</Text>
       </Pressable>
