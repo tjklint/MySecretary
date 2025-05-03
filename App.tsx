@@ -4,7 +4,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Secretary from './components/Secretary';
 import Plan from './components/Plan';
-import Prompting from './backend/services/geminiService';
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<'Secretary' | 'Plan'>('Secretary');
 
@@ -24,9 +24,6 @@ export default function App() {
           }
         />
       </View>
-
-      <Prompting />
-
       <Footer />
     </View>
   );

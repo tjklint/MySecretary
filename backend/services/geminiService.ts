@@ -1,9 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import dotenv from 'dotenv';
 
-dotenv.config();
+const GEMINI_API_KEY = "AIzaSyA5jlggpRwNycWE5EDieg8g29I_aqSWm2c"; 
 
-const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 export async function getLocationFromPrompt(userInput: string) {
   const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -13,14 +12,14 @@ export async function getLocationFromPrompt(userInput: string) {
   ]);
 
   const location = (await result.response.text()).trim();
-  return { location };
+  return location;
 }
 
 export async function getScheduleAndPackingList(userInput: string, travelDuration: string) {
   const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const result = await model.generateContent([
-    `Given the event: "${userInput}" and a travel time of ${travelDuration}, assume the user needs 30 minutes to get ready. Generate a JSON object with two fields: "packingList" (array of strings) and "schedule" (array of {time: string, task: string}). No extra explanation.`
+    `Given the event: "${userInput}" and a travel time of ${travelDuration}, assume the user needs 30 minutes to get ready. Respond ONLY with JSON like {"packingList": ["item1", "item2"], "schedule": [{"time": "6:00am", "task": "Wake up"}, {"time": "6:30am", "task": "Leave house"}]}. No extra words.`
   ]);
 
   const text = await result.response.text();
