@@ -15,14 +15,14 @@ app.use(express.json());
 app.post("/api/plan", (req: Request, res: Response) => {
   (async () => {
     try {
-      const { userInput, origin } = req.body;
+      const { userInput, origin, tot } = req.body;
 
       if (!userInput || !origin) {
         return res.status(400).json({ error: "Missing userInput or origin" });
       }
 
       const destination = await getLocationFromPrompt(userInput);
-      const travelInfo = await getTravelInfo(origin, destination);
+      const travelInfo = await getTravelInfo(origin, destination, tot);
       const plan = await getScheduleAndPackingList(userInput, travelInfo.duration);
 
       return res.json({
