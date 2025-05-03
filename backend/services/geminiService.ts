@@ -1,32 +1,64 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const GEMINI_API_KEY = "AIzaSyA5jlggpRwNycWE5EDieg8g29I_aqSWm2c"; 
+const gemini = new GoogleGenerativeAI("AIzaSyA5jlggpRwNycWE5EDieg8g29I_aqSWm2c"); // <- PUT YOUR API KEY HERE
 
-const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
+export async function getLocationFromPrompt(prompt: string): Promise<string> {
+  const model = gemini.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-export async function getLocationFromPrompt(userInput: string) {
-  const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const fullPrompt = `
+You are helping find a destination.
+ONLY respond with the exact name of the location/place the user is going to.
+Do not explain anything else.
 
-  const result = await model.generateContent([
-    `Extract only the location (address or place name) from this: "${userInput}". Only give the address or place name, no extra text.`
-  ]);
+User says: ${prompt}
+`;
 
-  const location = (await result.response.text()).trim();
-  return location;
+  const result = await model.generateContent([fullPrompt]);
+  const text = result.response.text().trim();
+
+  console.log('Destination extracted from Gemini:', text);
+  return text;
 }
 
-export async function getScheduleAndPackingList(userInput: string, travelDuration: string) {
-  const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+export async function getScheduleAndPackingList(prompt: string, travelDuration: string): Promise<any> {
+  const model = gemini.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const result = await model.generateContent([
-    `Given the event: "${userInput}" and a travel time of ${travelDuration}, assume the user needs 30 minutes to get ready. Respond ONLY with JSON like {"packingList": ["item1", "item2"], "schedule": [{"time": "6:00am", "task": "Wake up"}, {"time": "6:30am", "task": "Leave house"}]}. No extra words.`
-  ]);
+  const fullPrompt = `
+You are an assistant helping plan a trip. 
+The user needs to wake up, get ready, travel for ${travelDuration}, and arrive on time. 
+Also suggest a packing list.
 
-  const text = await result.response.text();
+Respond ONLY as JSON. DO NOT explain anything.
+
+Format:
+{
+  "packingList": ["Item1", "Item2"],
+  "schedule": [
+    { "time": "6:00am", "task": "Wake up" },
+    { "time": "6:30am", "task": "Leave house" }
+  ]
+}
+
+User says: ${prompt}
+`;
+
+  const result = await model.generateContent([fullPrompt]);
+  let text = result.response.text();
+
+  console.log('Gemini raw output:', text);
+
+  // --- Clean the response if wrapped in triple backticks ---
+  text = text.trim();
+  if (text.startsWith("```")) {
+    text = text.replace(/```json|```/g, "").trim();
+  }
+  // ----------------------------------------------------------
+
   try {
-    const json = JSON.parse(text);
-    return json;
-  } catch (e) {
-    throw new Error("Failed to parse Gemini output as JSON: " + text);
+    const parsed = JSON.parse(text);
+    return parsed;
+  } catch (error) {
+    console.error('Failed parsing Gemini output:', text);
+    throw new Error('Failed to parse Gemini output as JSON.');
   }
 }
