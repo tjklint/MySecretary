@@ -8,7 +8,6 @@ import {
   StyleSheet,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import Plan from "./Plan";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 
@@ -64,7 +63,11 @@ const Secretary: React.FC = () => {
       </View>
       <Pressable
         style={styles.planButton}
-        onPress={() => navigation.navigate("Plan")}
+        onPress={() => navigation.navigate("Plan", {
+          details,
+          tot,
+          budget,
+        })}
       >
         <Text style={styles.planText}>PLAN</Text>
       </Pressable>
