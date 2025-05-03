@@ -1,11 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Button } from 'react-native';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Secretary from './components/Secretary';
+import Plan from './components/Plan';
 export default function App() {
+  const [currentScreen, setCurrentScreen] = useState<'Secretary' | 'Plan'>('Secretary');
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <Header />
+      <View style={styles.content}>
+        {currentScreen === 'Secretary' ? (
+          <Secretary />
+        ) : (
+          <Plan />
+        )}
+        <Button
+          title={currentScreen === 'Secretary' ? 'Go to Plan' : 'Go to Secretary'}
+          onPress={() =>
+            setCurrentScreen(currentScreen === 'Secretary' ? 'Plan' : 'Secretary')
+          }
+        />
+      </View>
+      <Footer />
     </View>
   );
 }
@@ -14,7 +32,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
 });
