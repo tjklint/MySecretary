@@ -1,28 +1,30 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 
-dotenv.config();
+const GOOGLE_MAPS_API_KEY = "AIzaSyDXlf0tCD7YL2sIRX0MlPLcvp9r4fu_peE"; // hardcoded or load from Constants if you want
 
-export async function getTravelInfo(destination: string) {
-  const origin = "YOUR_DEFAULT_ORIGIN_ADDRESS"; // OR use req.query.origin later if dynamic
+export async function getTravelInfo(
+  originCoords: { latitude: number; longitude: number },
+  destination: string
+) {
+  const origin = `${originCoords.latitude},${originCoords.longitude}`;
 
-  const response = await axios.get('https://maps.googleapis.com/maps/api/directions/json', {
+  const response = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
     params: {
       origin,
       destination,
-      key: process.env.GOOGLE_MAPS_API_KEY,
+      key: GOOGLE_MAPS_API_KEY,
       mode: 'transit',
     }
   });
 
-  const route = response.data.routes[0]?.legs[0];
+  const route = response.data.routes?.[0]?.legs?.[0];
   if (!route) {
-    throw new Error("No route found.");
+    throw new Error('No route found.');
   }
 
   return {
     duration: route.duration.text,
-    departureTime: route.departure_time?.text || "Unknown",
+    departureTime: route.departure_time?.text || 'Unknown',
     steps: route.steps.map((step: any) => ({
       instructions: step.html_instructions,
       duration: step.duration.text,
